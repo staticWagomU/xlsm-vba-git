@@ -1,0 +1,18 @@
+# lefthook.yml — .xlsm コミット時に VBA ソースコードを自動エクスポートする
+#
+# 前提条件:
+#   - PowerShell 7+ (pwsh)
+#   - Excel + Trust Center で VBA プロジェクトへのアクセスを許可
+#   - lefthook 1.6.1+ (stage_fixed サポート)
+#
+# セットアップ:
+#   lefthook install
+#
+# 参考: https://lefthook.dev/configuration/
+
+pre-commit:
+  commands:
+    export-vba:
+      glob: "*.xlsm"
+      run: pwsh -File scripts/export-vba.ps1 {staged_files}
+      stage_fixed: true

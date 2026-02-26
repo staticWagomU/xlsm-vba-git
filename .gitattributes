@@ -1,0 +1,11 @@
+# VBA ソースファイルは Excel が Shift-JIS で出力する
+# git diff で日本語が正しく表示されるようにする
+*.bas diff working-tree-encoding=Shift_JIS
+*.cls diff working-tree-encoding=Shift_JIS
+
+# ユーザーフォーム (.frm) はテキスト部分の後にバイナリデータを含む
+*.frm binary
+
+# Excel ブック自体はバイナリとして扱う（テキスト差分を試みない）
+*.xlsm binary
+*.xltm binary
