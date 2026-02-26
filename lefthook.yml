@@ -1,4 +1,4 @@
-# lefthook.yml — .xlsm コミット時に VBA ソースコードを自動エクスポートする
+# lefthook.yml — VBA ソースと Excel ブックの双方向同期
 #
 # 前提条件:
 #   - PowerShell 7+ (pwsh)
@@ -10,9 +10,28 @@
 #
 # 参考: https://lefthook.dev/configuration/
 
+# --- .xlsm をコミット → src/ に VBA を自動エクスポート ---
 pre-commit:
   commands:
     export-vba:
       glob: "*.xlsm"
       run: pwsh -File scripts/export-vba.ps1 {staged_files}
       stage_fixed: true
+
+# --- コミット後、src/ が変わっていたら .xlsm にインポート ---
+# post-commit/post-checkout/post-merge では {files} が使えないため
+# スクリプト内で git diff HEAD~1 HEAD を使って自動検出する
+post-commit:
+  commands:
+    import-vba:
+      run: pwsh -File scripts/import-changed-vba.ps1
+
+post-checkout:
+  commands:
+    import-vba:
+      run: pwsh -File scripts/import-changed-vba.ps1
+
+post-merge:
+  commands:
+    import-vba:
+      run: pwsh -File scripts/import-changed-vba.ps1

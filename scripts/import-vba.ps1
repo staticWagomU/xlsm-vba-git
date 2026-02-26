@@ -15,9 +15,14 @@
     .\import-vba.ps1 MyWorkbook.xlsm
 #>
 param (
-    [Parameter(Mandatory = $true, Position = 0, ValueFromRemainingArguments = $true)]
+    [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
     [string[]]$Path
 )
+
+if (-not $Path -or $Path.Count -eq 0) {
+    Write-Host "対象ファイルなし（スキップ）"
+    exit 0
+}
 
 $sjis = [System.Text.Encoding]::GetEncoding(932)
 

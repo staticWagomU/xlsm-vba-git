@@ -15,9 +15,14 @@
     .\export-vba.ps1 Book1.xlsm Book2.xlsm
 #>
 param (
-    [Parameter(Mandatory = $true, Position = 0, ValueFromRemainingArguments = $true)]
+    [Parameter(Position = 0, ValueFromRemainingArguments = $true)]
     [string[]]$Path
 )
+
+if (-not $Path -or $Path.Count -eq 0) {
+    Write-Host "対象ファイルなし（スキップ）"
+    exit 0
+}
 
 function Get-VBComponentTypeExtension {
     param([int]$Type)
@@ -131,6 +136,21 @@ foreach ($filePath in $Path) {
     }
 
     Export-VBAFromWorkbook -XlsmPath $filePath
+}
+
+# エクスポート成功時、src/ を自動ステージ + 循環防止マーカー作成
+if (-not $script:hasError) {
+    $repoRoot = Split-Path $PSScriptRoot -Parent
+
+    # エクスポートされた src/ をステージに追加
+    git -C $repoRoot add "src/" 2>$null
+
+    # post-commit での循環インポートを防止するマーカーを作成
+    $gitDir = (git -C $repoRoot rev-parse --git-dir 2>$null)
+    if ($gitDir) {
+        $skipMarker = Join-Path $gitDir "vba-exported"
+        New-Item -ItemType File -Path $skipMarker -Force | Out-Null
+    }
 }
 
 if ($script:hasError) {
